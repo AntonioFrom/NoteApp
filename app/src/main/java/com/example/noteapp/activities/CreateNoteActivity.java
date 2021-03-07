@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,7 +35,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         inputNoteTitle = findViewById(R.id.inputNoteTitle);
         inputNoteSubtitle = findViewById(R.id.inputNoteSubtitle);
         inputNoteText = findViewById(R.id.inputNote);
-        textDateTime = findViewById(R.id.textDateTime);
+        textDateTime = findViewById(R.id.inputTextDateTime);
 
         textDateTime.setText(new SimpleDateFormat("EEEE, dd MMMM yyyy HH;mm a", Locale.getDefault())
                 .format(new Date()));

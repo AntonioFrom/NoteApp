@@ -68,7 +68,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/image_back" />
 
             <TextView
-                android:id="@+id/textDateTime"
+                android:id="@+id/inputTextDateTime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/ubuntu_regular"
@@ -99,7 +99,7 @@
                 android:textSize="@dimen/_13ssp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/viewSubtitleIndicator"
-                app:layout_constraintTop_toBottomOf="@+id/textDateTime" />
+                app:layout_constraintTop_toBottomOf="@+id/inputTextDateTime" />
 
             <View
                 android:id="@+id/viewSubtitleIndicator"
