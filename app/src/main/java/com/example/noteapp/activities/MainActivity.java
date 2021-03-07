@@ -1,13 +1,17 @@
 package com.example.noteapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
-
+import androidx.appcompat.app.AppCompatActivity;
 import com.example.noteapp.R;
-import com.example.noteapp.activities.CreateNoteActivity;
+import com.example.noteapp.database.NotesDatabase;
+import com.example.noteapp.entities.Note;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,5 +26,26 @@ public class MainActivity extends AppCompatActivity {
         imageAddNoteMain.setOnClickListener(v ->
                 startActivityForResult(new Intent(getApplicationContext(), CreateNoteActivity.class)
                         , REQUEST_CODE_ADD_NOTE));
+        getNotes();
+    }
+
+    private void getNotes() {
+
+        @SuppressLint("StaticFieldLeak")
+        class GetNoteTask extends AsyncTask<Void, Void, List<Note>> {
+
+            @Override
+            protected List<Note> doInBackground(Void... voids) {
+                return NotesDatabase.getNotesDatabase(getApplicationContext())
+                        .noteDao().getAllNotes();
+            }
+
+            @Override
+            protected void onPostExecute(List<Note> notes) {
+                super.onPostExecute(notes);
+                Log.e("mynotes", notes.toString());
+            }
+        }
+        new GetNoteTask().execute();
     }
 }
