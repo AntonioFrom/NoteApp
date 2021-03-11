@@ -55,9 +55,10 @@ public class CreateNoteActivity extends AppCompatActivity {
     private String selectedImagePath;
     private TextView textWebURL;
     private LinearLayout layoutWebURL;
-    private static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
-    private static final int REQUEST_CODE_SELECT_IMAGE = 2;
+    public static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
+    public static final int REQUEST_CODE_SELECT_IMAGE = 2;
     private AlertDialog dialogAddUrl;
+    private Note alreadyAvailableNote;
 
     @SuppressLint("SimpleDateFormat")
     @Override
@@ -81,9 +82,41 @@ public class CreateNoteActivity extends AppCompatActivity {
         imageSave.setOnClickListener(v -> saveNote());
         selectedNoteColor = "#333333";
         selectedImagePath = "";
+        if (getIntent().getBooleanExtra("isViewOrUpdate", false)) {
+            alreadyAvailableNote = (Note) getIntent().getSerializableExtra("note");
+            setViewOrUpdateNote();
+        }
+        findViewById(R.id.imageRemoveWebURL).setOnClickListener(v->{
+            textWebURL.setText(null);
+            layoutWebURL.setVisibility(View.GONE);
+        });
+        findViewById(R.id.imageRemoveImage).setOnClickListener(v->{
+            imageNote.setImageBitmap(null);
+            imageNote.setVisibility(View.GONE);
+            findViewById(R.id.imageRemoveImage).setVisibility(View.GONE);
+            selectedImagePath="";
+        });
         initMiscellaneous();
         setSubTitleIndicatorColor();
 
+    }
+
+    private void setViewOrUpdateNote() {
+        inputNoteTitle.setText(alreadyAvailableNote.getTitle());
+        inputNoteSubtitle.setText(alreadyAvailableNote.getSubtitile());
+        inputNoteText.setText(alreadyAvailableNote.getNoteText());
+        textDateTime.setText(alreadyAvailableNote.getDateTime());
+        if (alreadyAvailableNote.getImagePath() != null
+                && !alreadyAvailableNote.getImagePath().trim().isEmpty()){
+            imageNote.setImageBitmap(BitmapFactory.decodeFile(alreadyAvailableNote.getImagePath()));
+            imageNote.setVisibility(View.VISIBLE);
+            findViewById(R.id.imageRemoveImage).setVisibility(View.VISIBLE);
+            selectedImagePath = alreadyAvailableNote.getImagePath();
+        }
+        if (alreadyAvailableNote.getWebLink() != null && !alreadyAvailableNote.getWebLink().trim().isEmpty()){
+            textWebURL.setText(alreadyAvailableNote.getWebLink());
+            layoutWebURL.setVisibility(View.VISIBLE);
+        }
     }
 
     private void saveNote() {
@@ -102,9 +135,11 @@ public class CreateNoteActivity extends AppCompatActivity {
             note.setDateTime(textDateTime.getText().toString());
             note.setColor(selectedNoteColor);
             note.setImagePath(selectedImagePath);
-
             if (layoutWebURL.getVisibility() == View.VISIBLE) {
                 note.setWebLink(textWebURL.getText().toString());
+            }
+            if (alreadyAvailableNote != null){
+                note.setId(alreadyAvailableNote.getId());
             }
 
             @SuppressLint("StaticFieldLeak")
@@ -120,9 +155,8 @@ public class CreateNoteActivity extends AppCompatActivity {
                 protected void onPostExecute(Void aVoid) {
                     super.onPostExecute(aVoid);
                     Intent intent = new Intent();
-                    setResult(REQUEST_CODE_ADD_NOTE, intent);
+                    setResult(RESULT_OK, intent);
                     finish();
-
                 }
             }
             new SaveNoteTask().execute();
@@ -192,6 +226,24 @@ public class CreateNoteActivity extends AppCompatActivity {
             setSubTitleIndicatorColor();
         });
 
+        if (alreadyAvailableNote != null && alreadyAvailableNote.getColor() != null &&
+        !alreadyAvailableNote.getColor().trim().isEmpty()){
+            switch (alreadyAvailableNote.getColor()){
+                case "#fdbe3b":
+                    layoutMiscellaneous.findViewById(R.id.viewColor2).performClick();
+                    break;
+                case "#ff4842":
+                    layoutMiscellaneous.findViewById(R.id.viewColor3).performClick();
+                    break;
+                case "#3a52fc":
+                    layoutMiscellaneous.findViewById(R.id.viewColor4).performClick();
+                    break;
+                case "#000000":
+                    layoutMiscellaneous.findViewById(R.id.viewColor5).performClick();
+                    break;
+            }
+        }
+
         layoutMiscellaneous.findViewById(R.id.layoutAddImage).setOnClickListener(v -> {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             if (ContextCompat.checkSelfPermission(
@@ -246,6 +298,8 @@ public class CreateNoteActivity extends AppCompatActivity {
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                         imageNote.setImageBitmap(bitmap);
                         imageNote.setVisibility(View.VISIBLE);
+                        findViewById(R.id.imageRemoveImage).setVisibility(View.VISIBLE);
+
                         selectedImagePath = getPathFromUri(selectedImageUri);
                     } catch (Exception e) {
                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -287,10 +341,9 @@ public class CreateNoteActivity extends AppCompatActivity {
                 if (inputUrl.getText().toString().trim().isEmpty()) {
                     Toast.makeText(CreateNoteActivity.this, "EnterURL", Toast.LENGTH_LONG).show();
                 } else
-                   /* if (!Patterns.WEB_URL.matcher(inputUrl.getText().toString()).matches()) {
+                    if (!Patterns.WEB_URL.matcher(inputUrl.getText().toString()).matches()) {
                     Toast.makeText(CreateNoteActivity.this, "Enter valid URL", Toast.LENGTH_LONG).show();
-                } else*/
-                    {
+                } else {
                     layoutWebURL.setVisibility(View.VISIBLE);
                     textWebURL.setText(inputUrl.getText().toString());
                     dialogAddUrl.dismiss();
