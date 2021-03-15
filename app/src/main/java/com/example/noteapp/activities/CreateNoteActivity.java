@@ -56,8 +56,8 @@ public class CreateNoteActivity extends AppCompatActivity {
     private String selectedImagePath;
     private TextView textWebURL;
     private LinearLayout layoutWebURL;
-    public static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
-    public static final int REQUEST_CODE_SELECT_IMAGE = 2;
+    public static final int REQUEST_CODE_STORAGE_PERMISSION = 104;
+    public static final int REQUEST_CODE_SELECT_IMAGE = 105;
     private AlertDialog dialogAddUrl;
     private AlertDialog dialogDeleteNote;
     private Note alreadyAvailableNote;
@@ -98,6 +98,21 @@ public class CreateNoteActivity extends AppCompatActivity {
             findViewById(R.id.imageRemoveImage).setVisibility(View.GONE);
             selectedImagePath = "";
         });
+        if (getIntent().getBooleanExtra("isFromQuickActions",false)){
+            String type = getIntent().getStringExtra("quickActionType");
+            if (type != null){
+                if (type.equals("image")){
+                    selectedImagePath = getIntent().getStringExtra("imagePath");
+                    imageNote.setImageBitmap(BitmapFactory.decodeFile(selectedImagePath));
+                    imageNote.setVisibility(View.VISIBLE);
+                    findViewById(R.id.imageRemoveImage).setVisibility(View.VISIBLE);
+                } else if (type.equals("URL")){
+                    textWebURL.setText(getIntent().getStringExtra("URL"));
+                    layoutWebURL.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
         initMiscellaneous();
         setSubTitleIndicatorColor();
 
@@ -124,11 +139,9 @@ public class CreateNoteActivity extends AppCompatActivity {
     private void saveNote() {
         if (inputNoteTitle.getText().toString().trim().isEmpty()) {
             Toast.makeText(this, "Note title can't be empty!", Toast.LENGTH_LONG).show();
-            return;
         } else if (inputNoteSubtitle.getText().toString().trim().isEmpty()
                 && inputNoteText.getText().toString().trim().isEmpty()) {
             Toast.makeText(this, "Note can't be empty!", Toast.LENGTH_LONG).show();
-            return;
         } else {
             final Note note = new Note();
             note.setTitle(inputNoteTitle.getText().toString());
@@ -277,6 +290,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         gradientDrawable.setColor(Color.parseColor(selectedNoteColor));
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private void selectImage() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         if (intent.resolveActivity(getPackageManager()) != null) {
@@ -338,7 +352,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         if (dialogAddUrl == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(CreateNoteActivity.this);
             View view = LayoutInflater.from(this).inflate(
-                    R.layout.layout_add_url, (ViewGroup) findViewById(R.id.layoutAddUrlContainer));
+                    R.layout.layout_add_url, findViewById(R.id.layoutAddUrlContainer));
             builder.setView(view);
             dialogAddUrl = builder.create();
             dialogAddUrl.getWindow().setBackgroundDrawable(new ColorDrawable(0));
@@ -355,9 +369,7 @@ public class CreateNoteActivity extends AppCompatActivity {
                     dialogAddUrl.dismiss();
                 }
             });
-            view.findViewById(R.id.textCancel).setOnClickListener(v -> {
-                dialogAddUrl.dismiss();
-            });
+            view.findViewById(R.id.textCancel).setOnClickListener(v -> dialogAddUrl.dismiss());
         }
         dialogAddUrl.show();
     }
@@ -366,7 +378,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         if (dialogDeleteNote == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(CreateNoteActivity.this);
             View view = LayoutInflater.from(this).inflate(
-                    R.layout.layout_delete_note, (ViewGroup) findViewById(R.id.layoutDeleteNoteContainer));
+                    R.layout.layout_delete_note, findViewById(R.id.layoutDeleteNoteContainer));
             builder.setView(view);
             dialogDeleteNote = builder.create();
             dialogDeleteNote.getWindow().setBackgroundDrawable(new ColorDrawable(0));
@@ -392,9 +404,7 @@ public class CreateNoteActivity extends AppCompatActivity {
                 }
                 new DeleteNoteTask().execute();
             });
-            view.findViewById(R.id.textNoteDeletingCancel).setOnClickListener(v -> {
-                dialogDeleteNote.dismiss();
-            });
+            view.findViewById(R.id.textNoteDeletingCancel).setOnClickListener(v -> dialogDeleteNote.dismiss());
         }
         dialogDeleteNote.show();
     }
