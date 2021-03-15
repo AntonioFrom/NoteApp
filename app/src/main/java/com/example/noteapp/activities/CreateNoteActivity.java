@@ -58,10 +58,8 @@ public class CreateNoteActivity extends AppCompatActivity {
     private LinearLayout layoutWebURL;
     public static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
     public static final int REQUEST_CODE_SELECT_IMAGE = 2;
-
     private AlertDialog dialogAddUrl;
     private AlertDialog dialogDeleteNote;
-
     private Note alreadyAvailableNote;
 
     @SuppressLint("SimpleDateFormat")
